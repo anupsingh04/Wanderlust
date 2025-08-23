@@ -26,6 +26,10 @@ const listingSchema = new Schema({
       ref: "Review",
     },
   ],
+  owner: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
 });
 
 //this middleware will be automatically called when findByIdAndDelete will be called for the listings.

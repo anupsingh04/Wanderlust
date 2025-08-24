@@ -1,5 +1,10 @@
 const Listing = require("../models/listing.js");
 
+// for geocoding
+const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
+const mapToken = process.env.MAP_TOKEN;
+const geocodingClient = mbxGeocoding({ accessToken: mapToken });
+
 module.exports.index = async (req, res) => {
   const allListings = await Listing.find({});
   res.render("listings/index.ejs", { allListings });
@@ -28,13 +33,25 @@ module.exports.showListing = async (req, res) => {
 };
 
 module.exports.createListing = async (req, res, next) => {
+  let response = await geocodingClient
+    .forwardGeocode({
+      query: req.body.location + ", " + req.body.country,
+      limit: 1,
+    })
+    .send();
+
   let url = req.file.path;
   let filename = req.file.filename;
 
   const newListing = new Listing(req.body);
   newListing.owner = req.user._id; //now the creater will be linked to his listing
   newListing.image = { url, filename };
-  await newListing.save();
+
+  newListing.geometry = response.body.features[0].geometry;
+
+  let savedListing = await newListing.save();
+  console.log(savedListing);
+
   req.flash("success", "New Listing Created!");
   res.redirect("/listings");
 };
@@ -59,6 +76,17 @@ module.exports.renderEditForm = async (req, res) => {
 module.exports.updateListing = async (req, res) => {
   let { id } = req.params;
   let listing = await Listing.findByIdAndUpdate(id, req.body);
+
+  // Geocode if location or country changed - By Copilot
+  if (req.body.location || req.body.country) {
+    let response = await geocodingClient
+      .forwardGeocode({
+        query: req.body.location + ", " + req.body.country,
+        limit: 1,
+      })
+      .send();
+    listing.geometry = response.body.features[0].geometry;
+  }
 
   if (typeof req.file !== "undefined") {
     let url = req.file.path;

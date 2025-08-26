@@ -21,5 +21,5 @@ yarn-error.log*
 .idea/
 
 # Operating System generated files
-.DS_Store
+**/.DS_Store
 Thumbs.db

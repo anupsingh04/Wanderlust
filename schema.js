@@ -7,7 +7,8 @@ module.exports.listingSchema = Joi.object({
   location: Joi.string().required(),
   country: Joi.string().required(),
   image: Joi.string().allow("", null),
-});
+  category: Joi.array().items(Joi.string()),
+}).required();
 
 // // This is how ma'am has defined it
 // module.exports.listingSchema = Joi.object({

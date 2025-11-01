@@ -1,7 +1,5 @@
 if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config({
-    silent: true,
-  });
+  require("dotenv").config();
 }
 
 const express = require("express");
@@ -24,105 +22,107 @@ const userRouter = require("./routes/user.js");
 
 const dbUrl = process.env.ATLASDB_URL;
 
-main()
-  .then(() => {
-    console.log("connected to db");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-
 async function main() {
   await mongoose.connect(dbUrl);
 }
 
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(methodOverride("_method"));
-app.engine("ejs", ejsMate);
-app.use(express.static(path.join(__dirname, "public")));
+main()
+  .then(() => {
+    console.log("Connected to DB");
 
-const store = MongoStore.create({
-  mongoUrl: dbUrl,
-  crypto: {
-    secret: process.env.SECRET,
-  },
-  touchAfter: 24 * 60 * 60, // time period in seconds
-});
+    app.set("view engine", "ejs");
+    app.set("views", path.join(__dirname, "views"));
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
+    app.use(methodOverride("_method"));
+    app.engine("ejs", ejsMate);
+    app.use(express.static(path.join(__dirname, "public")));
 
-store.on("error", (err) => {
-  console.log("ERROR in MONGO SESSION STORE ", err);
-});
+    const store = MongoStore.create({
+      mongoUrl: dbUrl,
+      crypto: {
+        secret: process.env.SECRET,
+      },
+      touchAfter: 24 * 60 * 60, // time period in seconds
+    });
 
-const sessionOptions = {
-  store,
-  secret: process.env.SECRET,
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days in ms
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    httpOnly: true, //for security reasons - not imp here
-  },
-};
+    store.on("error", (err) => {
+      console.log("ERROR in MONGO SESSION STORE ", err);
+    });
 
-// app.get("/", (req, res) => {
-//   res.send("hi i am root");
-// });
+    const sessionOptions = {
+      store,
+      secret: process.env.SECRET,
+      resave: false,
+      saveUninitialized: true,
+      cookie: {
+        expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true, //for security reasons - not imp here
+      },
+    };
 
-app.use(session(sessionOptions));
-app.use(flash());
+    // app.get("/", (req, res) => {
+    //   res.send("hi i am root");
+    // });
 
-app.use(passport.initialize());
-app.use(passport.session());
-// use static authenticate method of model in LocalStrategy
-passport.use(new LocalStrategy(User.authenticate())); //authenticate - login/signup
-// use static serialize and deserialize of model for passport session support
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+    app.use(session(sessionOptions));
+    app.use(flash());
 
-app.use((req, res, next) => {
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
-  res.locals.currUser = req.user;
-  next();
-});
+    app.use(passport.initialize());
+    app.use(passport.session());
+    // use static authenticate method of model in LocalStrategy
+    passport.use(new LocalStrategy(User.authenticate())); //authenticate - login/signup
+    // use static serialize and deserialize of model for passport session support
+    passport.serializeUser(User.serializeUser());
+    passport.deserializeUser(User.deserializeUser());
 
-// //------- Demo User --------
-// app.get("/demouser", async (req, res) => {
-//   let fakeUser = new User({
-//     email: "student@gmail.com",
-//     username: "deltastudent",
-//   });
+    app.use((req, res, next) => {
+      res.locals.success = req.flash("success");
+      res.locals.error = req.flash("error");
+      res.locals.currUser = req.user;
+      next();
+    });
 
-//   let registeredUser = await User.register(fakeUser, "helloWorld");
-//   res.send(registeredUser);
-// });
+    // //------- Demo User --------
+    // app.get("/demouser", async (req, res) => {
+    //   let fakeUser = new User({
+    //     email: "student@gmail.com",
+    //     username: "deltastudent",
+    //   });
 
-app.use("/listings", listingRouter);
-app.use("/listings/:id/reviews", reviewRouter);
-app.use("/", userRouter);
+    //   let registeredUser = await User.register(fakeUser, "helloWorld");
+    //   res.send(registeredUser);
+    // });
 
-// // This is what maam taught but it crashes the server so
-// // I asked gemini for help and it told me to use app.use
-// // instead which I did and it worked.
-// app.all("*", (req, res, next) => {
-//   next(new ExpressError(404, "Page Not Found"));
-// });
+    app.use("/listings", listingRouter);
+    app.use("/listings/:id/reviews", reviewRouter);
+    app.use("/", userRouter);
 
-//Suggested fix by gemini
-app.use((req, res, next) => {
-  next(new ExpressError(404, "Page Not Found!"));
-});
+    // // This is what maam taught but it crashes the server so
+    // // I asked gemini for help and it told me to use app.use
+    // // instead which I did and it worked.
+    // app.all("*", (req, res, next) => {
+    //   next(new ExpressError(404, "Page Not Found"));
+    // });
 
-app.use((err, req, res, next) => {
-  let { statusCode = 500, message = "Something went wrong" } = err;
-  res.status(statusCode).render("error.ejs", { message });
-  // res.status(statusCode).send(message);
-});
+    //Suggested fix by gemini
+    app.use((req, res, next) => {
+      next(new ExpressError(404, "Page Not Found!"));
+    });
 
-app.listen(8080, () => {
-  console.log("server is listening at port 8080.");
-});
+    app.use((err, req, res, next) => {
+      let { statusCode = 500, message = "Something went wrong" } = err;
+      res
+        .status(statusCode)
+        .render("error.ejs", { message, currUser: req.user });
+      // res.status(statusCode).send(message);
+    });
+
+    app.listen(8080, () => {
+      console.log("server is listening at port 8080.");
+    });
+  })
+  .catch((err) => {
+    console.log("FATAL: MongoDB Connection Failed", err);
+  });

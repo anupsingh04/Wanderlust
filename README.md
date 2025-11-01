@@ -108,7 +108,6 @@ You're all set! Now, run the start command from your terminal:
 npm start
 ```
 
-````
 
 The app will start on **http://localhost:8080**.
 
@@ -198,7 +197,3 @@ This project is not licensed yet, but it will most probably be licensed under th
 
 For questions or suggestions, feel free to open an issue or contact [anupsingh04](https://github.com/anupsingh04).
 
-```
-
-```
-````

@@ -1,6 +1,3 @@
-Here is the complete text for your `README.md` file. You can copy and paste this directly:
-
-````md
 # Wanderlust
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_Site-brightgreen?style=for-the-badge)](https://major-project-9owe.onrender.com/listings)
@@ -110,6 +107,7 @@ You're all set! Now, run the start command from your terminal:
 ```sh
 npm start
 ```
+
 ````
 
 The app will start on **http://localhost:8080**.
@@ -203,3 +201,4 @@ For questions or suggestions, feel free to open an issue or contact [anupsingh04
 ```
 
 ```
+````

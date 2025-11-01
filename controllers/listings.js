@@ -6,7 +6,27 @@ const mapToken = process.env.MAP_TOKEN;
 const geocodingClient = mbxGeocoding({ accessToken: mapToken });
 
 module.exports.index = async (req, res) => {
-  const allListings = await Listing.find({});
+  // 1. Get both query parameters
+  const { category, q } = req.query;
+  // 2. Start with an empty filter
+  let filter = {};
+  // 3. Add category filter if it exists
+  if (category) {
+    filter.category = category;
+  }
+  // 4. Add search filter if it exists
+  if (q) {
+    // $or: Find listings that match EITHER title Or location Or country
+    filter.$or = [
+      { title: { $regex: q, $options: "i" } }, // 'i' means case-insensitive
+      { location: { $regex: q, $options: "i" } },
+      { country: { $regex: q, $options: "i" } },
+    ];
+  }
+  // 5. Run the query with the combined filter
+  // Mongoose will find documents that match ALL filter conditions (e.g., category AND search query)
+  const allListings = await Listing.find(filter);
+  // 6. Render the page
   res.render("listings/index.ejs", { allListings });
 };
 
@@ -44,6 +64,13 @@ module.exports.createListing = async (req, res, next) => {
   let filename = req.file.filename;
 
   const newListing = new Listing(req.body);
+
+  // If no categories were checked, req.body.category will be undefined.
+  // We set it to an empty array to prevent database errors.
+  if (!newListing.category) {
+    newListing.category = [];
+  }
+
   newListing.owner = req.user._id; //now the creater will be linked to his listing
   newListing.image = { url, filename };
 
@@ -75,7 +102,17 @@ module.exports.renderEditForm = async (req, res) => {
 
 module.exports.updateListing = async (req, res) => {
   let { id } = req.params;
-  let listing = await Listing.findByIdAndUpdate(id, req.body);
+
+  // If no categories are checked, req.body.category will be undefined.
+  // We must set it to an empty array [] to correctly overwrite the old categories.
+  if (!req.body.category) {
+    req.body.category = [];
+  }
+
+  let listing = await Listing.findByIdAndUpdate(id, req.body, {
+    new: true,
+    runValidators: true,
+  });
 
   // Geocode if location or country changed - By Copilot
   if (req.body.location || req.body.country) {
@@ -95,7 +132,7 @@ module.exports.updateListing = async (req, res) => {
   }
   await listing.save();
 
-  req.flash("success", "Listing Updated!");
+  req.flash("success", "Listing successfully updated!");
   res.redirect(`/listings/${id}`);
 };
 

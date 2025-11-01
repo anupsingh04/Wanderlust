@@ -36,6 +36,22 @@ const listingSchema = new Schema({
       required: true,
     },
   },
+  //category to implement the filter
+  category: {
+    type: [String],
+    enum: [
+      "Trending",
+      "Rooms",
+      "Iconic cities",
+      "Castles",
+      "Amazing pools",
+      "Mountains",
+      "Camping",
+      "Farms",
+      "Arctic",
+    ],
+    default: [], // Good practice to default to an empty array
+  },
 });
 
 //this middleware will be automatically called when findByIdAndDelete will be called for the listings.

@@ -39,49 +39,74 @@
     display: flex;
     align-items: center;
   }
+  .listing-link,
+  .listing-link:hover {
+    text-decoration: none !important; /* Removes the underline */
+    color: inherit !important; /* Makes it use the parent's color (i.e., your dark text color) */
+  }
 </style>
 
 <div id="filters">
-  <div class="filter">
-    <div><i class="fa-solid fa-fire"></i></div>
-    <p>Trending</p>
-  </div>
-  <div class="filter">
-    <div><i class="fa-solid fa-bed"></i></div>
-    <p>Rooms</p>
-  </div>
-  <div class="filter">
-    <div><i class="fa-solid fa-mountain-city"></i></div>
-    <p>Iconic cities</p>
-  </div>
-  <div class="filter">
-    <div><i class="fa-brands fa-fort-awesome"></i></div>
-    <p>Castles</p>
-  </div>
-  <div class="filter">
-    <div><i class="fa-solid fa-person-swimming"></i></div>
-    <p>Amazing pools</p>
-  </div>
-  <div class="filter">
-    <div><i class="fa-solid fa-mountain"></i></div>
-    <p>Mountains</p>
-  </div>
-  <div class="filter">
-    <div><i class="fa-solid fa-campground"></i></div>
-    <p>Camping</p>
-  </div>
-  <div class="filter">
-    <div><i class="fa-solid fa-cow"></i></div>
-    <p>Farms</p>
-  </div>
-  <div class="filter">
-    <div><i class="fa-solid fa-person-snowboarding"></i></div>
-    <p>Arctic</p>
-  </div>
-  <div class="filter">
-    <div><i class="fa-solid fa-ship"></i></div>
-    <p>Boats</p>
-  </div>
+  <a href="/listings" class="listing-link">
+    <div class="filter">
+      <div><i class="fa-solid fa-globe"></i></div>
+      <p>All</p>
+    </div>
+  </a>
+  <a href="/listings?category=Trending" class="listing-link">
+    <div class="filter">
+      <div><i class="fa-solid fa-fire"></i></div>
+      <p>Trending</p>
+    </div>
+  </a>
+  <a href="/listings?category=Rooms" class="listing-link">
+    <div class="filter">
+      <div><i class="fa-solid fa-bed"></i></div>
+      <p>Rooms</p>
+    </div>
+  </a>
+  <a href="/listings?category=Iconic+cities" class="listing-link">
+    <div class="filter">
+      <div><i class="fa-solid fa-mountain-city"></i></div>
+      <p>Iconic cities</p>
+    </div>
+  </a>
+  <a href="/listings?category=Castles" class="listing-link">
+    <div class="filter">
+      <div><i class="fa-brands fa-fort-awesome"></i></div>
+      <p>Castles</p>
+    </div>
+  </a>
+  <a href="/listings?category=Amazing+pools" class="listing-link">
+    <div class="filter">
+      <div><i class="fa-solid fa-person-swimming"></i></div>
+      <p>Amazing pools</p>
+    </div>
+  </a>
+  <a href="/listings?category=Mountains" class="listing-link">
+    <div class="filter">
+      <div><i class="fa-solid fa-mountain"></i></div>
+      <p>Mountains</p>
+    </div>
+  </a>
+  <a href="/listings?category=Camping" class="listing-link">
+    <div class="filter">
+      <div><i class="fa-solid fa-campground"></i></div>
+      <p>Camping</p>
+    </div>
+  </a>
+  <a href="/listings?category=Farms" class="listing-link">
+    <div class="filter">
+      <div><i class="fa-solid fa-cow"></i></div>
+      <p>Farms</p>
+    </div>
+  </a>
+  <a href="/listings?category=Arctic" class="listing-link">
+    <div class="filter">
+      <div><i class="fa-solid fa-person-snowboarding"></i></div>
+      <p>Arctic</p>
+    </div>
+  </a>
 
   <div class="tax-toggle">
     <div class="form-check-reverse form-switch">
@@ -111,6 +136,9 @@
       <div class="card-body">
         <p class="card-text">
           <b><%= listing.title %></b> <br />
+          <span class="text-muted"
+            ><%=listing.location%>, <%=listing.country%></span
+          ><br />
           ₹<%= (listing.price * 83).toLocaleString("en-IN") %> ($<%=
           listing.price.toLocaleString("en-US") %>) / week
           <i class="tax-info">&nbsp;&nbsp; +18% GST</i>
